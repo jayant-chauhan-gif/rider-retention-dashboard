@@ -1,11 +1,12 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { fetchKPI, fetchMonthlyCohort, fetchWeeklyCohort, fetchFilters } from '@/lib/api';
+import { fetchKPI, fetchMonthlyCohort, fetchWeeklyCohort, fetchFilters, fetchComposition } from '@/lib/api';
 import KPITiles from './KPITiles';
 import Filters from './Filters';
 import SummarySection from './SummarySection';
 import MonthlyTab from './MonthlyTab';
 import WeeklyTab from './WeeklyTab';
+import CompositionTab from './CompositionTab';
 
 const DEFAULT_FILTERS = { fleetLevel: 'all', warehouseId: 'all', orderStatus: 'all' };
 
@@ -14,19 +15,22 @@ export default function Dashboard() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [filterOptions, setFilterOptions] = useState(null);
 
-  const [kpi, setKpi]         = useState(null);
-  const [monthly, setMonthly] = useState(null);
-  const [weekly, setWeekly]   = useState(null);
+  const [kpi, setKpi]               = useState(null);
+  const [monthly, setMonthly]       = useState(null);
+  const [weekly, setWeekly]         = useState(null);
   const [weeklyUpdatedAt, setWeeklyUpdatedAt] = useState(null);
+  const [composition, setComposition] = useState(null);
 
-  const [loadingKpi,     setLoadingKpi]     = useState(true);
-  const [loadingMonthly, setLoadingMonthly] = useState(true);
-  const [loadingWeekly,  setLoadingWeekly]  = useState(true);
-  const [loadingFilters, setLoadingFilters] = useState(true);
+  const [loadingKpi,         setLoadingKpi]         = useState(true);
+  const [loadingMonthly,     setLoadingMonthly]     = useState(true);
+  const [loadingWeekly,      setLoadingWeekly]      = useState(true);
+  const [loadingFilters,     setLoadingFilters]     = useState(true);
+  const [loadingComposition, setLoadingComposition] = useState(true);
 
-  const [errorKpi,     setErrorKpi]     = useState(null);
-  const [errorMonthly, setErrorMonthly] = useState(null);
-  const [errorWeekly,  setErrorWeekly]  = useState(null);
+  const [errorKpi,         setErrorKpi]         = useState(null);
+  const [errorMonthly,     setErrorMonthly]     = useState(null);
+  const [errorWeekly,      setErrorWeekly]      = useState(null);
+  const [errorComposition, setErrorComposition] = useState(null);
 
   // Load filter options once
   useEffect(() => {
@@ -41,9 +45,11 @@ export default function Dashboard() {
     setLoadingKpi(true);
     setLoadingMonthly(true);
     setLoadingWeekly(true);
+    setLoadingComposition(true);
     setErrorKpi(null);
     setErrorMonthly(null);
     setErrorWeekly(null);
+    setErrorComposition(null);
 
     fetchKPI(filters)
       .then(setKpi)
@@ -59,6 +65,11 @@ export default function Dashboard() {
       .then((r) => { setWeekly(r.data); setWeeklyUpdatedAt(r.updated_at); })
       .catch((e) => setErrorWeekly(e.message))
       .finally(() => setLoadingWeekly(false));
+
+    fetchComposition(filters)
+      .then((r) => setComposition(r.data))
+      .catch((e) => setErrorComposition(e.message))
+      .finally(() => setLoadingComposition(false));
   }, [filters]);
 
   useEffect(() => { loadAll(); }, [loadAll]);
@@ -107,8 +118,9 @@ export default function Dashboard() {
       {/* Tab nav */}
       <div className="flex gap-1 border-b border-gray-200">
         {[
-          { id: 'monthly', label: 'Monthly Cohort' },
-          { id: 'weekly',  label: 'Weekly Live' },
+          { id: 'monthly',     label: 'Monthly Cohort' },
+          { id: 'weekly',      label: 'Weekly Live' },
+          { id: 'composition', label: 'Supply Composition' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -136,6 +148,9 @@ export default function Dashboard() {
           error={errorWeekly}
           onRefresh={refreshWeekly}
         />
+      )}
+      {activeTab === 'composition' && (
+        <CompositionTab data={composition} loading={loadingComposition} error={errorComposition} />
       )}
     </div>
   );
