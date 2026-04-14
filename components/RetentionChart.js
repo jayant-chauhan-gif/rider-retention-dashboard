@@ -25,21 +25,15 @@ export default function RetentionChart({ rows }) {
 
   const data = rows.map((row) => ({
     week: `W${row.user_week_number}`,
-    'W-1 Retention':  row.w1_pct          != null ? parseFloat(row.w1_pct)          || null : null,
-    'W-2 Retention':  row.w2_pct          != null ? parseFloat(row.w2_pct)          || null : null,
-    'Reactivation':   row.reactivation_pct != null ? parseFloat(row.reactivation_pct) || null : null,
-    active: row.active_riders,
+    'W+1 Retention':  parseFloat(row.w1_pct)           || null,
+    'W+2 Retention':  parseFloat(row.w2_pct)           || null,
+    'W+3 Retention':  parseFloat(row.w3_pct)           || null,
+    'W+4 Retention':  parseFloat(row.w4_pct)           || null,
+    'Reactivation':   parseFloat(row.reactivation_pct) || null,
   }));
 
-  // Null out 0s for current/incomplete week so lines don't drop to zero
-  data.forEach((d) => {
-    if (d['W-1 Retention'] === 0) d['W-1 Retention'] = null;
-    if (d['W-2 Retention'] === 0) d['W-2 Retention'] = null;
-    if (d['Reactivation']  === 0) d['Reactivation']  = null;
-  });
-
   return (
-    <ResponsiveContainer width="100%" height={320}>
+    <ResponsiveContainer width="100%" height={340}>
       <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
         <XAxis
@@ -57,39 +51,23 @@ export default function RetentionChart({ rows }) {
           width={45}
         />
         <Tooltip content={<CustomTooltip />} />
-        <Legend
-          wrapperStyle={{ fontSize: '13px', paddingTop: '12px' }}
+        <Legend wrapperStyle={{ fontSize: '13px', paddingTop: '12px' }} />
+        <ReferenceLine
+          y={70}
+          stroke="#e5e7eb"
+          strokeDasharray="4 4"
+          label={{ value: '70%', position: 'insideTopRight', fontSize: 11, fill: '#9ca3af' }}
         />
-        <ReferenceLine y={70} stroke="#e5e7eb" strokeDasharray="4 4" label={{ value: '70%', position: 'insideTopRight', fontSize: 11, fill: '#9ca3af' }} />
-        <Line
-          type="monotone"
-          dataKey="W-1 Retention"
-          stroke="#6366f1"
-          strokeWidth={2.5}
-          dot={{ r: 4, fill: '#6366f1' }}
-          activeDot={{ r: 6 }}
-          connectNulls={false}
-        />
-        <Line
-          type="monotone"
-          dataKey="W-2 Retention"
-          stroke="#10b981"
-          strokeWidth={2.5}
-          strokeDasharray="5 3"
-          dot={{ r: 4, fill: '#10b981' }}
-          activeDot={{ r: 6 }}
-          connectNulls={false}
-        />
-        <Line
-          type="monotone"
-          dataKey="Reactivation"
-          stroke="#f59e0b"
-          strokeWidth={2}
-          strokeDasharray="3 3"
-          dot={{ r: 3, fill: '#f59e0b' }}
-          activeDot={{ r: 5 }}
-          connectNulls={false}
-        />
+        <Line type="monotone" dataKey="W+1 Retention" stroke="#6366f1" strokeWidth={2.5}
+          dot={{ r: 4, fill: '#6366f1' }} activeDot={{ r: 6 }} connectNulls={false} />
+        <Line type="monotone" dataKey="W+2 Retention" stroke="#10b981" strokeWidth={2.5}
+          strokeDasharray="5 3" dot={{ r: 4, fill: '#10b981' }} activeDot={{ r: 6 }} connectNulls={false} />
+        <Line type="monotone" dataKey="W+3 Retention" stroke="#8b5cf6" strokeWidth={2}
+          strokeDasharray="5 3" dot={{ r: 3, fill: '#8b5cf6' }} activeDot={{ r: 5 }} connectNulls={false} />
+        <Line type="monotone" dataKey="W+4 Retention" stroke="#ec4899" strokeWidth={2}
+          strokeDasharray="3 3" dot={{ r: 3, fill: '#ec4899' }} activeDot={{ r: 5 }} connectNulls={false} />
+        <Line type="monotone" dataKey="Reactivation" stroke="#f59e0b" strokeWidth={2}
+          strokeDasharray="3 3" dot={{ r: 3, fill: '#f59e0b' }} activeDot={{ r: 5 }} connectNulls={false} />
       </LineChart>
     </ResponsiveContainer>
   );

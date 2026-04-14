@@ -14,63 +14,80 @@ function pctCell(val) {
   );
 }
 
+function reactCell(val) {
+  if (val == null || val === '0.0' || val === 0) return <span className="text-gray-300">—</span>;
+  const n = parseFloat(val);
+  return (
+    <span className="inline-block px-2 py-0.5 rounded-full text-sm font-semibold text-amber-700 bg-amber-50">
+      {n}%
+    </span>
+  );
+}
+
 export default function RetentionTable({ rows, groupByMonth = false }) {
   if (!rows || rows.length === 0) {
     return <div className="text-center text-gray-400 py-10 text-sm">No data available</div>;
   }
 
+  const headers = (
+    <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+      {groupByMonth && <th className="text-left px-4 py-3 font-semibold">Month</th>}
+      <th className="text-left px-4 py-3 font-semibold">Week</th>
+      <th className="text-left px-4 py-3 font-semibold">Week Start</th>
+      <th className="text-right px-4 py-3 font-semibold">Active (W0)</th>
+      <th className="text-center px-4 py-3 font-semibold text-indigo-600">W+1</th>
+      <th className="text-center px-4 py-3 font-semibold text-emerald-600">W+2</th>
+      <th className="text-center px-4 py-3 font-semibold text-violet-600">W+3</th>
+      <th className="text-center px-4 py-3 font-semibold text-pink-600">W+4</th>
+      <th className="text-center px-4 py-3 font-semibold text-amber-600">Reactivation</th>
+    </tr>
+  );
+
+  function dataRow(row, monthCell) {
+    return (
+      <tr key={row.week_start_date} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+        {monthCell}
+        <td className="px-4 py-3 text-gray-700 font-medium">W{row.user_week_number}</td>
+        <td className="px-4 py-3 text-gray-500">
+          {new Date(row.week_start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+        </td>
+        <td className="px-4 py-3 text-right font-semibold text-gray-800">{row.active_riders}</td>
+        <td className="px-4 py-3 text-center">{pctCell(row.w1_pct)}</td>
+        <td className="px-4 py-3 text-center">{pctCell(row.w2_pct)}</td>
+        <td className="px-4 py-3 text-center">{pctCell(row.w3_pct)}</td>
+        <td className="px-4 py-3 text-center">{pctCell(row.w4_pct)}</td>
+        <td className="px-4 py-3 text-center">{reactCell(row.reactivation_pct)}</td>
+      </tr>
+    );
+  }
+
   if (groupByMonth) {
-    // Group rows by month of week_start_date
     const groups = {};
     const groupOrder = [];
     rows.forEach((row) => {
       const d = new Date(row.week_start_date);
       const key = d.toLocaleString('default', { month: 'long', year: 'numeric' });
-      if (!groups[key]) {
-        groups[key] = [];
-        groupOrder.push(key);
-      }
+      if (!groups[key]) { groups[key] = []; groupOrder.push(key); }
       groups[key].push(row);
     });
 
     return (
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-              <th className="text-left px-4 py-3 font-semibold">Month</th>
-              <th className="text-left px-4 py-3 font-semibold">Week</th>
-              <th className="text-left px-4 py-3 font-semibold">Week Start</th>
-              <th className="text-right px-4 py-3 font-semibold">Active Riders (W0)</th>
-              <th className="text-right px-4 py-3 font-semibold">Retained W-1</th>
-              <th className="text-center px-4 py-3 font-semibold">W-1 Retention</th>
-              <th className="text-right px-4 py-3 font-semibold">Retained W-2</th>
-              <th className="text-center px-4 py-3 font-semibold">W-2 Retention</th>
-              <th className="text-center px-4 py-3 font-semibold text-amber-600">Reactivation</th>
-            </tr>
-          </thead>
+          <thead>{headers}</thead>
           <tbody>
             {groupOrder.map((month) =>
-              groups[month].map((row, i) => (
-                <tr key={row.week_start_date} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
-                  {i === 0 ? (
-                    <td
-                      rowSpan={groups[month].length}
-                      className="px-4 py-3 font-semibold text-gray-700 align-top border-r border-gray-100"
-                    >
-                      {month}
-                    </td>
-                  ) : null}
-                  <td className="px-4 py-3 text-gray-700 font-medium">W{row.user_week_number}</td>
-                  <td className="px-4 py-3 text-gray-500">{new Date(row.week_start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-gray-800">{row.active_riders}</td>
-                  <td className="px-4 py-3 text-right text-gray-600">{row.retained_w1 || '—'}</td>
-                  <td className="px-4 py-3 text-center">{pctCell(row.w1_pct)}</td>
-                  <td className="px-4 py-3 text-right text-gray-600">{parseFloat(row.retained_w2) > 0 ? row.retained_w2 : '—'}</td>
-                  <td className="px-4 py-3 text-center">{pctCell(row.w2_pct)}</td>
-                  <td className="px-4 py-3 text-center">{pctCell(row.reactivation_pct)}</td>
-                </tr>
-              ))
+              groups[month].map((row, i) => {
+                const monthCell = i === 0 ? (
+                  <td
+                    rowSpan={groups[month].length}
+                    className="px-4 py-3 font-semibold text-gray-700 align-top border-r border-gray-100 whitespace-nowrap"
+                  >
+                    {month}
+                  </td>
+                ) : null;
+                return dataRow(row, monthCell);
+              })
             )}
           </tbody>
         </table>
@@ -78,38 +95,12 @@ export default function RetentionTable({ rows, groupByMonth = false }) {
     );
   }
 
-  // Flat table (for weekly tab)
+  // Flat table (weekly tab)
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
-        <thead>
-          <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-            <th className="text-left px-4 py-3 font-semibold">Week</th>
-            <th className="text-left px-4 py-3 font-semibold">Week Start</th>
-            <th className="text-right px-4 py-3 font-semibold">Active Riders (W0)</th>
-            <th className="text-right px-4 py-3 font-semibold">Retained W-1</th>
-            <th className="text-center px-4 py-3 font-semibold">W-1 Retention</th>
-            <th className="text-right px-4 py-3 font-semibold">Retained W-2</th>
-            <th className="text-center px-4 py-3 font-semibold">W-2 Retention</th>
-            <th className="text-center px-4 py-3 font-semibold text-amber-600">Reactivation</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.week_start_date} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
-              <td className="px-4 py-3 text-gray-700 font-medium">W{row.user_week_number}</td>
-              <td className="px-4 py-3 text-gray-500">
-                {new Date(row.week_start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-              </td>
-              <td className="px-4 py-3 text-right font-semibold text-gray-800">{row.active_riders}</td>
-              <td className="px-4 py-3 text-right text-gray-600">{row.retained_w1 || '—'}</td>
-              <td className="px-4 py-3 text-center">{pctCell(row.w1_pct)}</td>
-              <td className="px-4 py-3 text-right text-gray-600">{parseFloat(row.retained_w2) > 0 ? row.retained_w2 : '—'}</td>
-              <td className="px-4 py-3 text-center">{pctCell(row.w2_pct)}</td>
-              <td className="px-4 py-3 text-center">{pctCell(row.reactivation_pct)}</td>
-            </tr>
-          ))}
-        </tbody>
+        <thead>{headers}</thead>
+        <tbody>{rows.map((row) => dataRow(row, null))}</tbody>
       </table>
     </div>
   );

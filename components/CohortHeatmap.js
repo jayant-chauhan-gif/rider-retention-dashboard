@@ -10,8 +10,17 @@ function getColor(val) {
   return          { bg: 'bg-red-400',    text: 'text-white',      label: `${n}%` };
 }
 
-function Cell({ val }) {
-  const { bg, text, label } = getColor(val);
+function getReactColor(val) {
+  const n = parseFloat(val);
+  if (isNaN(n) || n === 0) return { bg: 'bg-gray-100', text: 'text-gray-300', label: '—' };
+  if (n >= 15) return { bg: 'bg-amber-600', text: 'text-white',      label: `${n}%` };
+  if (n >= 10) return { bg: 'bg-amber-400', text: 'text-white',      label: `${n}%` };
+  if (n >= 5)  return { bg: 'bg-amber-200', text: 'text-amber-900',  label: `${n}%` };
+  return          { bg: 'bg-amber-100', text: 'text-amber-700',  label: `${n}%` };
+}
+
+function Cell({ val, colorFn }) {
+  const { bg, text, label } = (colorFn || getColor)(val);
   return (
     <td className={`px-2 py-2.5 text-center text-xs font-semibold ${bg} ${text} border border-white`}>
       {label}
@@ -26,19 +35,32 @@ export default function CohortHeatmap({ rows }) {
 
   return (
     <div className="overflow-x-auto">
-      {/* Legend */}
-      <div className="flex items-center gap-3 mb-4 flex-wrap">
-        <span className="text-xs text-gray-500 font-medium">Scale:</span>
+      {/* Retention scale legend */}
+      <div className="flex items-center gap-4 mb-3 flex-wrap">
+        <span className="text-xs text-gray-500 font-medium">Retention scale:</span>
         {[
           { bg: 'bg-red-400',    label: '< 55%' },
           { bg: 'bg-orange-300', label: '55–64%' },
           { bg: 'bg-yellow-300', label: '65–74%' },
           { bg: 'bg-green-400',  label: '75–84%' },
           { bg: 'bg-green-600',  label: '≥ 85%' },
-          { bg: 'bg-gray-100',   label: 'No data' },
+          { bg: 'bg-gray-100',   label: 'No data', border: true },
+        ].map(({ bg, label, border }) => (
+          <div key={label} className="flex items-center gap-1">
+            <div className={`w-3 h-3 rounded-sm ${bg} ${border ? 'border border-gray-300' : ''}`} />
+            <span className="text-xs text-gray-500">{label}</span>
+          </div>
+        ))}
+        <span className="text-xs text-gray-300 mx-1">|</span>
+        <span className="text-xs text-gray-500 font-medium">Reactivation scale:</span>
+        {[
+          { bg: 'bg-amber-100', label: '< 5%' },
+          { bg: 'bg-amber-200', label: '5–9%' },
+          { bg: 'bg-amber-400', label: '10–14%' },
+          { bg: 'bg-amber-600', label: '≥ 15%' },
         ].map(({ bg, label }) => (
-          <div key={label} className="flex items-center gap-1.5">
-            <div className={`w-3 h-3 rounded-sm ${bg} border border-gray-200`} />
+          <div key={label} className="flex items-center gap-1">
+            <div className={`w-3 h-3 rounded-sm ${bg}`} />
             <span className="text-xs text-gray-500">{label}</span>
           </div>
         ))}
@@ -47,24 +69,14 @@ export default function CohortHeatmap({ rows }) {
       <table className="w-full text-sm border-collapse">
         <thead>
           <tr>
-            <th className="text-left px-3 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border border-gray-100 w-24">
-              Week
-            </th>
-            <th className="text-left px-3 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border border-gray-100 w-24">
-              Date
-            </th>
-            <th className="text-right px-3 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border border-gray-100">
-              Active (W0)
-            </th>
-            <th className="text-center px-3 py-2.5 text-xs font-semibold text-indigo-600 uppercase tracking-wide bg-indigo-50 border border-gray-100">
-              W+1 Retention
-            </th>
-            <th className="text-center px-3 py-2.5 text-xs font-semibold text-emerald-600 uppercase tracking-wide bg-emerald-50 border border-gray-100">
-              W+2 Retention
-            </th>
-            <th className="text-center px-3 py-2.5 text-xs font-semibold text-amber-600 uppercase tracking-wide bg-amber-50 border border-gray-100">
-              Reactivation
-            </th>
+            <th className="text-left px-3 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border border-gray-100 w-16">Week</th>
+            <th className="text-left px-3 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border border-gray-100 w-20">Date</th>
+            <th className="text-right px-3 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border border-gray-100">Active (W0)</th>
+            <th className="text-center px-3 py-2.5 text-xs font-semibold text-indigo-600 uppercase tracking-wide bg-indigo-50 border border-gray-100">W+1</th>
+            <th className="text-center px-3 py-2.5 text-xs font-semibold text-emerald-600 uppercase tracking-wide bg-emerald-50 border border-gray-100">W+2</th>
+            <th className="text-center px-3 py-2.5 text-xs font-semibold text-violet-600 uppercase tracking-wide bg-violet-50 border border-gray-100">W+3</th>
+            <th className="text-center px-3 py-2.5 text-xs font-semibold text-pink-600 uppercase tracking-wide bg-pink-50 border border-gray-100">W+4</th>
+            <th className="text-center px-3 py-2.5 text-xs font-semibold text-amber-600 uppercase tracking-wide bg-amber-50 border border-gray-100">Reactivation</th>
           </tr>
         </thead>
         <tbody>
@@ -81,7 +93,9 @@ export default function CohortHeatmap({ rows }) {
               </td>
               <Cell val={row.w1_pct} />
               <Cell val={row.w2_pct} />
-              <Cell val={row.reactivation_pct} />
+              <Cell val={row.w3_pct} />
+              <Cell val={row.w4_pct} />
+              <Cell val={row.reactivation_pct} colorFn={getReactColor} />
             </tr>
           ))}
         </tbody>
