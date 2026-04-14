@@ -51,7 +51,7 @@ export default function RetentionTable({ rows, groupByMonth = false }) {
           <tbody>
             {groupOrder.map((month) =>
               groups[month].map((row, i) => (
-                <tr key={row.week_of_year} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+                <tr key={row.week_start_date} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
                   {i === 0 ? (
                     <td
                       rowSpan={groups[month].length}
@@ -93,7 +93,7 @@ export default function RetentionTable({ rows, groupByMonth = false }) {
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.week_of_year} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+            <tr key={row.week_start_date} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
               <td className="px-4 py-3 text-gray-700 font-medium">W{row.user_week_number}</td>
               <td className="px-4 py-3 text-gray-500">
                 {new Date(row.week_start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
