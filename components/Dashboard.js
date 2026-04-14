@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { fetchKPI, fetchMonthlyCohort, fetchWeeklyCohort, fetchFilters } from '@/lib/api';
 import KPITiles from './KPITiles';
 import Filters from './Filters';
+import SummarySection from './SummarySection';
 import MonthlyTab from './MonthlyTab';
 import WeeklyTab from './WeeklyTab';
 
@@ -93,6 +94,15 @@ export default function Dashboard() {
         filterOptions={filterOptions}
         loading={loadingFilters}
       />
+
+      {/* Summary — YTD aggregate stats */}
+      <SummarySection data={monthly} loading={loadingMonthly} />
+
+      {/* Detailed section label */}
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-semibold text-gray-700">Detailed Cohort Analysis</span>
+        <div className="flex-1 border-t border-gray-200" />
+      </div>
 
       {/* Tab nav */}
       <div className="flex gap-1 border-b border-gray-200">

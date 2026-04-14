@@ -46,6 +46,7 @@ export default function RetentionTable({ rows, groupByMonth = false }) {
               <th className="text-center px-4 py-3 font-semibold">W-1 Retention</th>
               <th className="text-right px-4 py-3 font-semibold">Retained W-2</th>
               <th className="text-center px-4 py-3 font-semibold">W-2 Retention</th>
+              <th className="text-center px-4 py-3 font-semibold text-amber-600">Reactivation</th>
             </tr>
           </thead>
           <tbody>
@@ -67,6 +68,7 @@ export default function RetentionTable({ rows, groupByMonth = false }) {
                   <td className="px-4 py-3 text-center">{pctCell(row.w1_pct)}</td>
                   <td className="px-4 py-3 text-right text-gray-600">{parseFloat(row.retained_w2) > 0 ? row.retained_w2 : '—'}</td>
                   <td className="px-4 py-3 text-center">{pctCell(row.w2_pct)}</td>
+                  <td className="px-4 py-3 text-center">{pctCell(row.reactivation_pct)}</td>
                 </tr>
               ))
             )}
@@ -89,6 +91,7 @@ export default function RetentionTable({ rows, groupByMonth = false }) {
             <th className="text-center px-4 py-3 font-semibold">W-1 Retention</th>
             <th className="text-right px-4 py-3 font-semibold">Retained W-2</th>
             <th className="text-center px-4 py-3 font-semibold">W-2 Retention</th>
+            <th className="text-center px-4 py-3 font-semibold text-amber-600">Reactivation</th>
           </tr>
         </thead>
         <tbody>
@@ -103,6 +106,7 @@ export default function RetentionTable({ rows, groupByMonth = false }) {
               <td className="px-4 py-3 text-center">{pctCell(row.w1_pct)}</td>
               <td className="px-4 py-3 text-right text-gray-600">{parseFloat(row.retained_w2) > 0 ? row.retained_w2 : '—'}</td>
               <td className="px-4 py-3 text-center">{pctCell(row.w2_pct)}</td>
+              <td className="px-4 py-3 text-center">{pctCell(row.reactivation_pct)}</td>
             </tr>
           ))}
         </tbody>

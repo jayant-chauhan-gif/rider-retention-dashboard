@@ -25,8 +25,9 @@ export default function RetentionChart({ rows }) {
 
   const data = rows.map((row) => ({
     week: `W${row.user_week_number}`,
-    'W-1 Retention': row.w1_pct != null ? parseFloat(row.w1_pct) || null : null,
-    'W-2 Retention': row.w2_pct != null ? parseFloat(row.w2_pct) || null : null,
+    'W-1 Retention':  row.w1_pct          != null ? parseFloat(row.w1_pct)          || null : null,
+    'W-2 Retention':  row.w2_pct          != null ? parseFloat(row.w2_pct)          || null : null,
+    'Reactivation':   row.reactivation_pct != null ? parseFloat(row.reactivation_pct) || null : null,
     active: row.active_riders,
   }));
 
@@ -34,6 +35,7 @@ export default function RetentionChart({ rows }) {
   data.forEach((d) => {
     if (d['W-1 Retention'] === 0) d['W-1 Retention'] = null;
     if (d['W-2 Retention'] === 0) d['W-2 Retention'] = null;
+    if (d['Reactivation']  === 0) d['Reactivation']  = null;
   });
 
   return (
@@ -76,6 +78,16 @@ export default function RetentionChart({ rows }) {
           strokeDasharray="5 3"
           dot={{ r: 4, fill: '#10b981' }}
           activeDot={{ r: 6 }}
+          connectNulls={false}
+        />
+        <Line
+          type="monotone"
+          dataKey="Reactivation"
+          stroke="#f59e0b"
+          strokeWidth={2}
+          strokeDasharray="3 3"
+          dot={{ r: 3, fill: '#f59e0b' }}
+          activeDot={{ r: 5 }}
           connectNulls={false}
         />
       </LineChart>

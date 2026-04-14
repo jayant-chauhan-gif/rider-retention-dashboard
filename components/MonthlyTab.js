@@ -1,11 +1,12 @@
 'use client';
 import { useState } from 'react';
-import { LayoutGrid, LineChart as LineChartIcon } from 'lucide-react';
+import { LayoutGrid, LineChart as LineChartIcon, Grid } from 'lucide-react';
 import RetentionTable from './RetentionTable';
 import RetentionChart from './RetentionChart';
+import CohortHeatmap from './CohortHeatmap';
 
 export default function MonthlyTab({ data, loading, error }) {
-  const [view, setView] = useState('table'); // 'table' | 'chart'
+  const [view, setView] = useState('table'); // 'table' | 'chart' | 'heatmap'
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100">
@@ -28,6 +29,12 @@ export default function MonthlyTab({ data, loading, error }) {
           >
             <LineChartIcon size={13} /> Chart
           </button>
+          <button
+            onClick={() => setView('heatmap')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${view === 'heatmap' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            <Grid size={13} /> Heatmap
+          </button>
         </div>
       </div>
 
@@ -44,9 +51,9 @@ export default function MonthlyTab({ data, loading, error }) {
           <div className="text-center text-red-400 py-10 text-sm">{error}</div>
         )}
         {!loading && !error && data && (
-          view === 'table'
-            ? <RetentionTable rows={data} groupByMonth={true} />
-            : <RetentionChart rows={data} />
+          view === 'table'   ? <RetentionTable rows={data} groupByMonth={true} /> :
+          view === 'chart'   ? <RetentionChart rows={data} /> :
+                               <CohortHeatmap rows={data} />
         )}
       </div>
     </div>
